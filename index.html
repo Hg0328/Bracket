@@ -163,6 +163,38 @@
   .m.done{background:#fafbff}
   .m.final{border-color:#ecd9a4;background:var(--gold-soft)}
   .none{color:#d3d7de;font-size:13px;display:block;padding-top:8px}
+  div.m{cursor:default}
+  div.m:hover{border-color:var(--line)}
+  div.m.final:hover{border-color:#ecd9a4}
+
+  /* read-only (student view) */
+  .gno.ro{cursor:default}
+  .gno.ro:hover{border-color:var(--wire);color:var(--ink-2);transform:translate(-50%,-50%)}
+  .gno.ro.done:hover{border-color:var(--primary);background:var(--primary);color:#fff}
+  .gno.final.ro:not(.done):hover{border-color:var(--gold);background:#fff;color:var(--gold)}
+  .gno.final.ro.done:hover{background:var(--gold);border-color:var(--gold);color:#fff}
+  .slot .cls{
+    width:68px;padding:8px 4px;text-align:center;border:1px solid var(--line);border-radius:8px;
+    font-weight:700;font-size:14px;color:var(--ink);background:#f8f9fb;min-height:37px;line-height:19px
+  }
+  .slot .cls.empty{background:#fff;color:#c8ccd3;font-weight:500}
+
+  footer{text-align:center;padding:0 16px 32px;font-size:13px;color:var(--muted)}
+  footer:empty{display:none}
+  .linkbtn{border:0;background:none;font:inherit;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:2px 4px}
+  .linkbtn:hover{color:var(--ink)}
+  .admin-on{display:inline-block;color:var(--primary);font-weight:700;margin-right:6px}
+  .modal form{display:flex;flex-direction:column;gap:8px;text-align:left}
+  .modal form input{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px}
+  .modal form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+  .adm-add{display:flex;gap:6px;margin-bottom:12px}
+  .adm-add input{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px}
+  .adm-add input:focus{outline:none;border-color:var(--primary)}
+  .adm-list{list-style:none;margin:0;padding:0;text-align:left;max-height:240px;overflow:auto;border-top:1px solid var(--line)}
+  .adm-list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px;word-break:break-all}
+  .adm-list li small{color:var(--muted);font-weight:600;white-space:nowrap}
+  .adm-list .empty{color:var(--muted);justify-content:center}
+  .modal .err{color:var(--danger);font-size:13px;font-weight:600;min-height:1em;text-align:center}
 
   @media (max-width:640px){
     header{padding:26px 16px 16px}
@@ -179,7 +211,7 @@
     @page{size:A4 landscape;margin:12mm}
     body{background:#fff}
     header{padding:0 0 8px}
-    .tabs,.toolbar .right,.warn{display:none!important}
+    .tabs,.toolbar .right,.warn,footer{display:none!important}
     .sched-card{margin-top:0}
     .sched-wrap{overflow:visible}
     main{margin:0;max-width:none;padding:0}
@@ -211,9 +243,31 @@
   <section class="card sched-card" id="schedule"></section>
 </main>
 
+<footer id="adminbar"></footer>
+
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
+<!-- Firebase (실시간 동기화 · 운영자 로그인) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script>
+/* Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)에서 복사한 값을 붙여 넣으세요.
+   비워 두면 예전처럼 이 기기에만 저장되는 '로컬 모드'로 동작해요. */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyACxuWpyf9rAXk8NFVAvsyqXtZ3DZIp2Kg",
+  authDomain: "sport-495c7.firebaseapp.com",
+  databaseURL: "https://sport-495c7-default-rtdb.firebaseio.com",
+  projectId: "sport-495c7",
+  storageBucket: "sport-495c7.firebasestorage.app",
+  messagingSenderId: "144696503834",
+  appId: "1:144696503834:web:61c8d8bc34c4947b10eba3"
+};
+/* 대표 운영자 Gmail. 이 계정만 다른 운영자를 추가·삭제할 수 있어요.
+   (Firebase 보안 규칙에도 같은 주소를 넣어야 실제로 지켜져요) */
+var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
+</script>
 <script>
 (function(){
   "use strict";
@@ -239,7 +293,8 @@
       if (src.classes && typeof src.classes === "object") {
         Object.keys(src.classes).forEach(function(k){
           var i = parseInt(k,10);
-          if (i>=1 && i<=out[g].n) out[g].classes[i] = String(src.classes[k]).slice(0,12);
+          var v = src.classes[k];
+          if (v != null && v !== "" && i>=1 && i<=out[g].n) out[g].classes[i] = String(v).slice(0,12);
         });
       }
       if (src.winners && typeof src.winners === "object") {
@@ -255,22 +310,35 @@
   var state = fresh();
   var sharedLoaded = false;
 
-  // 1) shared link (#d=...) takes priority, 2) localStorage
+  /* ---------- mode ----------
+     로컬 모드: Firebase 설정이 비어 있으면 예전처럼 이 기기에 저장, 누구나 수정.
+     온라인 모드: 모두가 같은 데이터를 실시간으로 보고, 로그인한 운영자만 수정. */
+  var DB_PATH = "bracket2026";
+  var dbMode = !!(window.FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL && window.firebase);
+  var db = null, auth = null, adminUser = null;
+  function canEdit(){ return !dbMode || !!adminUser; }
+
+  // 1) shared link (#d=...) takes priority, 2) localStorage  (로컬 모드에서만)
   try {
-    var m = location.hash.match(/[#&]d=([^&]+)/);
+    var m = !dbMode && location.hash.match(/[#&]d=([^&]+)/);
     if (m) {
       var json = decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
       state = sanitize(JSON.parse(json));
       sharedLoaded = true;
     }
   } catch(e) { /* ignore broken link */ }
-  if (!sharedLoaded) {
+  if (!sharedLoaded && !dbMode) {
     try {
       var raw = localStorage.getItem(KEY);
       if (raw) state = sanitize(JSON.parse(raw));
     } catch(e) {}
   }
   function save(){
+    if (dbMode) {
+      if (!adminUser) return;
+      db.ref(DB_PATH).set(state).catch(function(){ toast("저장하지 못했어요. 운영자 권한을 확인해 주세요"); });
+      return;
+    }
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {}
   }
 
@@ -341,15 +409,16 @@
     function py(nd){ return nd.leaf ? base : base - nd.h * STEP; }
 
     var html = '';
+    var edit = canEdit();
     html += '<div class="toolbar">' +
               '<h2 class="panel-title">' + GRADES[g].title + '</h2>' +
-            '<div class="right">' +
+            (edit ? '<div class="right">' +
               '<label class="teamcount">팀 수 <input type="number" min="'+MIN_N+'" max="'+MAX_N+'" value="'+gs.n+'" data-act="n"></label>' +
               '<button class="btn primary" data-act="draw">번호 뽑기</button>' +
-              '<button class="btn" data-act="share">공유</button>' +
+              (dbMode ? '' : '<button class="btn" data-act="share">공유</button>') +
               '<button class="btn" data-act="print">인쇄</button>' +
               '<button class="btn ghost" data-act="reset">초기화</button>' +
-            '</div></div>';
+            '</div>' : '') + '</div>';
     html += '<div class="warn" id="warn-' + g + '"></div>';
     html += '<div class="scroller"><div class="bracket" style="width:'+W+'px;height:'+H+'px">';
 
@@ -376,8 +445,13 @@
       var isFinal = gm === t.root;
       var done = !!gs.winners[gm.id];
       var title = isFinal ? "결승전" : (gm.id + "경기");
-      html += '<button class="gno' + (isFinal?' final':'') + (done?' done':'') + '" data-game="'+gm.id+'" ' +
-              'style="left:'+px(gm)+'px;top:'+(py(gm)+17)+'px" title="'+title+' 결과 입력">' + gm.id + '</button>';
+      var gpos = 'style="left:'+px(gm)+'px;top:'+(py(gm)+17)+'px"';
+      if (edit) {
+        html += '<button class="gno' + (isFinal?' final':'') + (done?' done':'') + '" data-game="'+gm.id+'" ' +
+                gpos + ' title="'+title+' 결과 입력">' + gm.id + '</button>';
+      } else {
+        html += '<span class="gno ro' + (isFinal?' final':'') + (done?' done':'') + '" ' + gpos + ' title="'+title+'">' + gm.id + '</span>';
+      }
       if (done && !isFinal) {
         var w = teamOf(gs, gm);
         html += '<span class="wchip" style="left:'+px(gm)+'px;top:'+(py(gm)-17)+'px">' + esc(w.name) + '</span>';
@@ -394,10 +468,13 @@
     (function collect(nd){ if (nd.leaf) leaves.push(nd); else { collect(nd.left); collect(nd.right); } })(t.root);
     leaves.forEach(function(lf){
       var v = gs.classes[lf.slot] || "";
+      var lbl = classLabel(v);
       html += '<div class="slot" id="slot-'+g+'-'+lf.slot+'" style="left:'+px(lf)+'px;top:'+(base+8)+'px">' +
                 '<div class="num">' + lf.slot + '</div>' +
-                '<input type="text" maxlength="12" inputmode="text" placeholder="○반" aria-label="'+lf.slot+'번 반" ' +
-                  'data-slot="'+lf.slot+'" value="'+esc(v)+'">' +
+                (edit
+                  ? '<input type="text" maxlength="12" inputmode="text" placeholder="○반" aria-label="'+lf.slot+'번 반" ' +
+                      'data-slot="'+lf.slot+'" value="'+esc(v)+'">'
+                  : '<div class="cls' + (lbl ? '' : ' empty') + '">' + (lbl ? esc(lbl) : '–') + '</div>') +
               '</div>';
     });
 
@@ -471,10 +548,11 @@
           var a = sideText(gs, gm.left), b = sideText(gs, gm.right);
           if (w === "L") a = '<span class="w">' + a + '</span>';
           if (w === "R") b = '<span class="w">' + b + '</span>';
-          h += '<button class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
+          var tag = canEdit() ? 'button' : 'div';
+          h += '<' + tag + ' class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
                  '<span class="no">' + (isFinal ? '결승 (' + gm.id + '경기) · 3판 2승' : gm.id + '경기') + '</span>' +
                  '<span class="tm">' + a + ' <span class="vs-sep">vs</span> ' + b + '</span>' +
-               '</button>';
+               '</' + tag + '>';
         });
         h += '</td>';
       }
@@ -523,6 +601,7 @@
 
   /* ---------- game result ---------- */
   function openGame(g, id){
+    if (!canEdit()) return;
     var gs = state[g], t = trees[g], gm = t.byId[id];
     var isFinal = gm === t.root;
     var A = teamOf(gs, gm.left), B = teamOf(gs, gm.right);
@@ -703,12 +782,124 @@
   });
 
   document.getElementById("schedule").addEventListener("click", function(e){
-    var b = e.target.closest(".m"); if (!b) return;
+    var b = e.target.closest("button.m"); if (!b) return;
     openGame(b.getAttribute("data-sg"), parseInt(b.getAttribute("data-game"), 10));
   });
 
-  renderPanel("g1");
-  renderPanel("g2");
+  function renderAll(){ renderPanel("g1"); renderPanel("g2"); renderAdminBar(); }
+
+  /* ---------- 운영자 (Google 로그인) ----------
+     DB 구조: admins/{이메일의 '.'을 ','로 바꾼 값} = true  (Firebase 키에 '.'을 못 써서) */
+  var adminbar = document.getElementById("adminbar");
+  var isOwner = false;
+  function emailKey(e){ return String(e).trim().toLowerCase().replace(/\./g, ","); }
+  function keyEmail(k){ return String(k).replace(/,/g, "."); }
+
+  function renderAdminBar(){
+    if (!dbMode) { adminbar.innerHTML = ""; return; }
+    adminbar.innerHTML = adminUser
+      ? '<span class="admin-on">운영자 모드</span>' +
+        (isOwner ? '<button class="linkbtn" data-a="manage">운영자 관리</button>' : '') +
+        '<button class="linkbtn" data-a="logout">로그아웃</button>'
+      : '<button class="linkbtn" data-a="login">운영자 로그인</button>';
+  }
+  adminbar.addEventListener("click", function(e){
+    var b = e.target.closest("[data-a]"); if (!b) return;
+    var a = b.getAttribute("data-a");
+    if (a === "logout") { auth.signOut(); toast("로그아웃했어요"); }
+    if (a === "login") googleLogin();
+    if (a === "manage") openManage();
+  });
+
+  function googleLogin(){
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    auth.signInWithPopup(provider).catch(function(err){
+      var c = err && err.code;
+      if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment") {
+        auth.signInWithRedirect(provider);
+      } else if (c !== "auth/popup-closed-by-user" && c !== "auth/cancelled-popup-request") {
+        toast("로그인하지 못했어요. 크롬이나 사파리에서 다시 시도해 주세요");
+      }
+    });
+  }
+
+  // 로그인한 계정이 운영자인지 확인
+  function checkAdmin(user){
+    if (!user) { adminUser = null; isOwner = false; renderAll(); return; }
+    var email = (user.email || "").toLowerCase();
+    isOwner = !!OWNER_EMAIL && email === OWNER_EMAIL.trim().toLowerCase();
+    if (isOwner) { adminUser = user; renderAll(); return; }
+    db.ref("admins/" + emailKey(email)).once("value").then(function(snap){
+      if (snap.val() === true) { adminUser = user; renderAll(); toast("운영자 모드로 전환했어요"); }
+      else denied();
+    }, denied);
+    function denied(){
+      adminUser = null; renderAll();
+      toast(email + " 은(는) 운영자로 등록되지 않은 계정이에요");
+      auth.signOut();
+    }
+  }
+
+  // 대표 운영자 전용: Gmail로 운영자 추가·삭제
+  function openManage(){
+    if (!isOwner) return;
+    var ref = db.ref("admins");
+    openModal('<h2>운영자 관리</h2><div class="sub">추가한 Gmail 계정으로 로그인하면 결과를 수정할 수 있어요</div>' +
+      '<form class="adm-add" id="admForm"><input type="email" id="admEmail" placeholder="example@gmail.com" required>' +
+      '<button class="btn primary" type="submit">추가</button></form>' +
+      '<ul class="adm-list" id="admList"><li class="empty">불러오는 중…</li></ul>' +
+      '<div class="actions"><button class="btn" data-m="close">닫기</button></div>');
+    var list = document.getElementById("admList");
+    function draw(snap){
+      var v = snap.val() || {};
+      var rows = '<li><span>' + esc(OWNER_EMAIL) + '</span><small>대표</small></li>';
+      Object.keys(v).filter(function(k){ return v[k] === true; }).sort().forEach(function(k){
+        rows += '<li><span>' + esc(keyEmail(k)) + '</span><button class="btn ghost" data-del="' + esc(k) + '">삭제</button></li>';
+      });
+      list.innerHTML = rows;
+    }
+    function fail(){ list.innerHTML = '<li class="empty">목록을 불러오지 못했어요. 보안 규칙을 확인해 주세요</li>'; }
+    ref.on("value", draw, fail);
+    var prevClose = closeModal;
+    closeModal = function(){ ref.off("value", draw); closeModal = prevClose; prevClose(); };
+    document.getElementById("admForm").onsubmit = function(e){
+      e.preventDefault();
+      var inp = document.getElementById("admEmail"), em = inp.value.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { toast("이메일 주소를 확인해 주세요"); return; }
+      if (em === OWNER_EMAIL.trim().toLowerCase()) { toast("대표 운영자는 이미 운영자예요"); return; }
+      ref.child(emailKey(em)).set(true).then(function(){ inp.value = ""; toast(em + " 을(를) 운영자로 추가했어요"); },
+        function(){ toast("추가하지 못했어요. 보안 규칙을 확인해 주세요"); });
+    };
+    modal.onclick = function(e){
+      if (e.target.closest('[data-m="close"]')) { closeModal(); return; }
+      var d = e.target.closest("[data-del]"); if (!d) return;
+      var k = d.getAttribute("data-del");
+      if (confirm(keyEmail(k) + " 을(를) 운영자에서 뺄까요?")) {
+        ref.child(k).remove().then(function(){ toast("삭제했어요"); }, function(){ toast("삭제하지 못했어요"); });
+      }
+    };
+  }
+
+  if (dbMode) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database(); auth = firebase.auth();
+    auth.onAuthStateChanged(checkAdmin);
+    auth.getRedirectResult().catch(function(){});
+    db.ref(DB_PATH).on("value", function(snap){
+      var next = sanitize(snap.val());
+      if (JSON.stringify(next) === JSON.stringify(state)) return; // 내가 방금 저장한 값이면 다시 그리지 않음
+      var nChanged = next.g1.n !== state.g1.n || next.g2.n !== state.g2.n;
+      state = next;
+      var a = document.activeElement;
+      if (!nChanged && a && a.matches && a.matches(".slot input")) { // 입력 중이면 포커스 유지
+        refreshStatus("g1"); refreshStatus("g2"); renderSchedule(); return;
+      }
+      renderAll();
+    }, function(){ toast("대진표를 불러오지 못했어요"); });
+  }
+
+  renderAll();
   if (sharedLoaded) {
     save();
     history.replaceState(null, "", location.pathname + location.search);

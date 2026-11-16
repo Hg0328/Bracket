@@ -197,6 +197,25 @@
   .adm-list .empty{color:var(--muted);justify-content:center}
   .modal .err{color:var(--danger);font-size:13px;font-weight:600;min-height:1em;text-align:center}
 
+  /* phone: sideways bracket */
+  .scroller.horiz{overflow-x:hidden;padding-top:8px;margin:0}
+  .slot.h{transform:none;flex-direction:row;gap:4px;align-items:center}
+  .slot.h .num{width:16px;text-align:right}
+  .slot.h input,.slot.h .cls{width:64px;padding:7px 2px;font-size:13px}
+  .slot.h .cls{min-height:34px;line-height:18px}
+  .champ.top{left:0;right:0;top:0;transform:none}
+  /* phone: schedule list */
+  .dlist{display:flex;flex-direction:column;gap:14px}
+  .dhead{font-weight:800;font-size:15px;padding-bottom:6px;border-bottom:1px solid var(--wire);margin-bottom:8px}
+  .drow{margin-bottom:10px}
+  .drow:last-child{margin-bottom:0}
+  .dlabel{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .dlabel b{color:var(--ink);font-size:13px;margin-right:2px}
+  .dlabel .time{color:var(--primary)}
+  .dgames{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .dgames .m{margin:0}
+  .dgames .m.final{grid-column:1 / -1}
+
   @media (max-width:640px){
     header{padding:26px 16px 16px}
     .card{padding:16px}
@@ -397,17 +416,30 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
   /* ---------- rendering ---------- */
   var trees = {};
   var SP = 84, PADX = 50, STEP = 62, TOP = 92, LEAF_H = 86;
+  // 휴대폰(폭 640px 이하): 대진표를 옆으로 눕혀서(팀은 세로로, 우승은 오른쪽) 가로 스크롤 없이 보기
+  var mq = window.matchMedia("(max-width:640px)");
+  function isPhone(){ return mq.matches; }
+  var H_LEFT = 86, H_ROW = 46, H_TOP = 56;
 
   function renderPanel(g){
     var gs = state[g];
     var t = trees[g] = buildTree(gs.n);
     var panel = document.getElementById("panel-" + g);
-    var W = PADX*2 + (gs.n - 1) * SP;
-    var base = TOP + t.height * STEP;
-    var H = base + LEAF_H;
-
-    function px(nd){ return PADX + nd.x * SP; }
-    function py(nd){ return nd.leaf ? base : base - nd.h * STEP; }
+    var horiz = isPhone();
+    var W, H, base, px, py, stepH;
+    if (horiz) {
+      W = Math.max(280, document.documentElement.clientWidth - 66);
+      stepH = Math.max(36, Math.floor((W - H_LEFT - 22) / Math.max(1, t.height)));
+      H = H_TOP + gs.n * H_ROW;
+      px = function(nd){ return H_LEFT + nd.h * stepH; };
+      py = function(nd){ return H_TOP + nd.x * H_ROW + 17; };
+    } else {
+      W = PADX*2 + (gs.n - 1) * SP;
+      base = TOP + t.height * STEP;
+      H = base + LEAF_H;
+      px = function(nd){ return PADX + nd.x * SP; };
+      py = function(nd){ return nd.leaf ? base : base - nd.h * STEP; };
+    }
 
     var html = '';
     var edit = canEdit();
@@ -421,20 +453,24 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
               '<button class="btn ghost" data-act="reset">초기화</button>' +
             '</div>' : '') + '</div>';
     html += '<div class="warn" id="warn-' + g + '"></div>';
-    html += '<div class="scroller"><div class="bracket" style="width:'+W+'px;height:'+H+'px">';
+    html += '<div class="scroller' + (horiz ? ' horiz' : '') + '"><div class="bracket" style="width:'+W+'px;height:'+H+'px">';
 
     // lines
     var normal = [], win = [];
     t.games.forEach(function(gm){
       [["L", gm.left], ["R", gm.right]].forEach(function(pair){
         var c = pair[1];
-        var d = "M" + px(c) + " " + py(c) + " V" + py(gm) + " H" + px(gm);
+        var d = horiz
+          ? "M" + px(c) + " " + py(c) + " H" + px(gm) + " V" + py(gm)
+          : "M" + px(c) + " " + py(c) + " V" + py(gm) + " H" + px(gm);
         (gs.winners[gm.id] === pair[0] ? win : normal).push(d);
       });
     });
     var champ = teamOf(gs, t.root);
-    if (champ) win.push("M" + px(t.root) + " " + py(t.root) + " V" + (py(t.root) - 26));
-    else normal.push("M" + px(t.root) + " " + py(t.root) + " V" + (py(t.root) - 26));
+    var stub = horiz
+      ? "M" + px(t.root) + " " + py(t.root) + " H" + (px(t.root) + 16)
+      : "M" + px(t.root) + " " + py(t.root) + " V" + (py(t.root) - 26);
+    (champ ? win : normal).push(stub);
 
     html += '<svg width="'+W+'" height="'+H+'" aria-hidden="true">' +
       normal.map(function(d){ return '<path d="'+d+'"/>'; }).join("") +
@@ -446,21 +482,22 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
       var isFinal = gm === t.root;
       var done = !!gs.winners[gm.id];
       var title = isFinal ? "결승전" : (gm.id + "경기");
-      var gpos = 'style="left:'+px(gm)+'px;top:'+(py(gm)+17)+'px"';
+      var gpos = 'style="left:'+px(gm)+'px;top:'+(py(gm) + (horiz ? 0 : 17))+'px"';
       if (edit) {
         html += '<button class="gno' + (isFinal?' final':'') + (done?' done':'') + '" data-game="'+gm.id+'" ' +
                 gpos + ' title="'+title+' 결과 입력">' + gm.id + '</button>';
       } else {
         html += '<span class="gno ro' + (isFinal?' final':'') + (done?' done':'') + '" ' + gpos + ' title="'+title+'">' + gm.id + '</span>';
       }
-      if (done && !isFinal) {
+      if (done && !isFinal && !horiz) {
         var w = teamOf(gs, gm);
         html += '<span class="wchip" style="left:'+px(gm)+'px;top:'+(py(gm)-17)+'px">' + esc(w.name) + '</span>';
       }
     });
 
     // champion
-    html += '<div class="champ" style="left:'+px(t.root)+'px;top:'+(py(t.root)-28)+'px">' +
+    html += '<div class="champ' + (horiz ? ' top' : '') + '" style="' +
+              (horiz ? '' : 'left:'+px(t.root)+'px;top:'+(py(t.root)-28)+'px') + '">' +
             (champ ? '<div class="name">' + esc(champ.name) + ' 우승!</div>' : '<div class="tbd">우승</div>') +
             '</div>';
 
@@ -470,7 +507,8 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
     leaves.forEach(function(lf){
       var v = gs.classes[lf.slot] || "";
       var lbl = classLabel(v);
-      html += '<div class="slot" id="slot-'+g+'-'+lf.slot+'" style="left:'+px(lf)+'px;top:'+(base+8)+'px">' +
+      var spos = horiz ? 'left:0;top:'+(py(lf)-17)+'px' : 'left:'+px(lf)+'px;top:'+(base+8)+'px';
+      html += '<div class="slot' + (horiz ? ' h' : '') + '" id="slot-'+g+'-'+lf.slot+'" style="'+spos+'">' +
                 '<div class="num">' + lf.slot + '</div>' +
                 (edit
                   ? '<input type="text" maxlength="12" inputmode="text" placeholder="○반" aria-label="'+lf.slot+'번 반" ' +
@@ -553,6 +591,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
       Object.keys(r.dayOf).forEach(function(k){ maxIdx = Math.max(maxIdx, r.dayOf[k]); });
     });
 
+    if (isPhone()) { renderScheduleList(rows, maxIdx); return; }
     var h = '<h2>경기 일정</h2>' +
             '<div class="sched-wrap"><table class="sched"><thead><tr><th></th>';
     for (var d = 0; d <= maxIdx; d++) {
@@ -566,23 +605,45 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
         var list = t.games.filter(function(gm){ return r.dayOf[gm.id] === d; });
         h += '<td>';
         if (!list.length) h += '<span class="none">–</span>';
-        list.forEach(function(gm){
-          var isFinal = gm === t.root, w = gs.winners[gm.id];
-          var a = sideText(gs, gm.left), b = sideText(gs, gm.right);
-          if (w === "L") a = '<span class="w">' + a + '</span>';
-          if (w === "R") b = '<span class="w">' + b + '</span>';
-          var tag = canEdit() ? 'button' : 'div';
-          h += '<' + tag + ' class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
-                 '<span class="no">' + (isFinal ? '결승 (' + gm.id + '경기) · 3판 2승' : gm.id + '경기') + '</span>' +
-                 '<span class="tm">' + a + ' <span class="vs-sep">vs</span> ' + b + '</span>' +
-                 (isFinal && FINAL_NOTE[r.g] ? '<span class="fnote">' + FINAL_NOTE[r.g] + '</span>' : '') +
-               '</' + tag + '>';
-        });
+        list.forEach(function(gm){ h += matchHtml(r, gm); });
         h += '</td>';
       }
       h += '</tr>';
     });
     h += '</tbody></table></div>';
+    document.getElementById("schedule").innerHTML = h;
+  }
+
+  function matchHtml(r, gm){
+    var t = trees[r.g], gs = state[r.g];
+    var isFinal = gm === t.root, w = gs.winners[gm.id];
+    var a = sideText(gs, gm.left), b = sideText(gs, gm.right);
+    if (w === "L") a = '<span class="w">' + a + '</span>';
+    if (w === "R") b = '<span class="w">' + b + '</span>';
+    var tag = canEdit() ? 'button' : 'div';
+    return '<' + tag + ' class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
+             '<span class="no">' + (isFinal ? '결승 (' + gm.id + '경기) · 3판 2승' : gm.id + '경기') + '</span>' +
+             '<span class="tm">' + a + ' <span class="vs-sep">vs</span> ' + b + '</span>' +
+             (isFinal && FINAL_NOTE[r.g] ? '<span class="fnote">' + FINAL_NOTE[r.g] + '</span>' : '') +
+           '</' + tag + '>';
+  }
+
+  // 휴대폰: 날짜별 목록
+  function renderScheduleList(rows, maxIdx){
+    var h = '<h2>경기 일정</h2><div class="dlist">';
+    for (var d = 0; d <= maxIdx; d++) {
+      h += '<div class="dblock"><div class="dhead">' + dayLabel(d) + '</div>';
+      rows.forEach(function(r){
+        var list = trees[r.g].games.filter(function(gm){ return r.dayOf[gm.id] === d; });
+        if (!list.length) return;
+        var onlyTbdFinal = list.length === 1 && list[0] === trees[r.g].root && FINAL_NOTE[r.g];
+        h += '<div class="drow"><div class="dlabel"><b>' + r.label + '</b> ' +
+             (onlyTbdFinal ? FINAL_NOTE[r.g] : r.sub + ' · <span class="time">' + r.time + '</span>') + '</div>' +
+             '<div class="dgames">' + list.map(function(gm){ return matchHtml(r, gm); }).join("") + '</div></div>';
+      });
+      h += '</div>';
+    }
+    h += '</div>';
     document.getElementById("schedule").innerHTML = h;
   }
 
@@ -811,6 +872,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
   });
 
   function renderAll(){ renderPanel("g1"); renderPanel("g2"); renderAdminBar(); }
+  if (mq.addEventListener) mq.addEventListener("change", renderAll); else mq.addListener(renderAll);
 
   /* ---------- 운영자 (Google 로그인) ----------
      DB 구조: admins/{이메일의 '.'을 ','로 바꾼 값} = true  (Firebase 키에 '.'을 못 써서) */

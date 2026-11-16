@@ -146,8 +146,9 @@
   table.sched thead th{color:var(--muted);font-weight:700;font-size:13px;border-bottom:1px solid var(--wire)}
   table.sched thead th.fday{color:var(--gold)}
   table.sched tbody tr:last-child th,table.sched tbody tr:last-child td{border-bottom:0}
-  table.sched tbody th{color:var(--ink);font-weight:800;white-space:nowrap;vertical-align:middle;width:92px;text-align:left;padding-left:4px}
-  table.sched tbody th small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+  table.sched tbody th{color:var(--ink);font-weight:800;white-space:nowrap;vertical-align:middle;width:104px;text-align:left;padding-left:4px}
+  table.sched tbody th small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
+  table.sched tbody th small.time{color:var(--primary);font-variant-numeric:tabular-nums;margin-top:0}
   .m{
     display:block;width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 6px;margin:0 0 6px;
     cursor:pointer;font:inherit;text-align:center;transition:.12s
@@ -519,8 +520,8 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
   function renderSchedule(){
     if (!trees.g1 || !trees.g2) return;
     var rows = [
-      { g:"g1", label:"1학년", sub:"1타임" },
-      { g:"g2", label:"2학년", sub:"2타임" }
+      { g:"g1", label:"1학년", sub:"1타임", time:"11:30~11:50" },
+      { g:"g2", label:"2학년", sub:"2타임", time:"11:55~12:15" }
     ];
     var maxIdx = 0;
     rows.forEach(function(r){
@@ -538,7 +539,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
     h += '</tr></thead><tbody>';
     rows.forEach(function(r){
       var t = trees[r.g], gs = state[r.g];
-      h += '<tr><th>' + r.label + '<small>(' + r.sub + ')</small></th>';
+      h += '<tr><th>' + r.label + '<small>' + r.sub + '</small><small class="time">' + r.time + '</small></th>';
       for (var d = 0; d <= maxIdx; d++) {
         var list = t.games.filter(function(gm){ return r.dayOf[gm.id] === d; });
         h += '<td>';

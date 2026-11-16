@@ -7,267 +7,207 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   :root{
-    --navy:#1b2a4a;
-    --navy-2:#2c3e66;
-    --accent:#ff6b4a;
-    --accent-soft:#ffe3dc;
-    --gold:#f5b700;
-    --bg:#f4f6fb;
+    --ink:#111827;
+    --ink-2:#374151;
+    --muted:#8b93a1;
+    --line:#e6e8ec;
+    --wire:#c9ced6;
+    --bg:#f6f7f9;
     --card:#ffffff;
-    --line:#b7c0d3;
-    --text:#1d2433;
-    --muted:#6b7488;
+    --primary:#2f5bea;
+    --primary-soft:#eaf0ff;
+    --gold:#c9961a;
+    --gold-soft:#fdf6e3;
     --danger:#d93025;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
   body{
     font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-    background:var(--bg);color:var(--text);
-    -webkit-font-smoothing:antialiased;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;
   }
-  header{
-    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);
-    color:#fff;padding:28px 20px 70px;text-align:center;position:relative;overflow:hidden;
-  }
-  header::after{
-    content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;
-    border:28px solid rgba(255,255,255,.06);
-  }
-  header .eyebrow{font-size:13px;letter-spacing:.12em;opacity:.75;font-weight:600}
-  header h1{margin:8px 0 6px;font-size:clamp(22px,4.4vw,34px);font-weight:800;letter-spacing:-.02em}
-  header h1 span{color:var(--gold)}
-  header p{margin:0;font-size:14px;opacity:.8}
+  header{max-width:1180px;margin:0 auto;padding:36px 16px 20px;text-align:center}
+  header .eyebrow{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  header h1{margin:6px 0 0;font-size:clamp(24px,4vw,32px);font-weight:800;letter-spacing:-.03em}
 
-  main{max-width:1180px;margin:-46px auto 40px;padding:0 16px;position:relative;z-index:1}
+  main{max-width:1180px;margin:0 auto 48px;padding:0 16px}
 
-  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .tabs{display:flex;width:max-content;margin:0 auto 16px;padding:4px;background:#eceef2;border-radius:12px}
   .tab{
-    border:0;cursor:pointer;font:inherit;font-weight:700;font-size:16px;
-    padding:12px 26px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;
-    transition:.15s;
+    border:0;cursor:pointer;font:inherit;font-weight:700;font-size:15px;color:var(--muted);
+    padding:9px 28px;border-radius:9px;background:transparent;transition:.15s;
   }
-  .tab .cnt{font-weight:500;font-size:13px;opacity:.8;margin-left:4px}
-  .tab.active{background:#fff;color:var(--navy);box-shadow:0 6px 18px rgba(27,42,74,.18)}
+  .tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(17,24,39,.1)}
 
-  .card{background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(27,42,74,.08);padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
   .panel{display:none}
   .panel.active{display:block}
 
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .toolbar .left,.toolbar .right{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .panel-title{font-size:20px;font-weight:800;margin:0 6px 0 2px}
-  .progress{font-size:13px;color:var(--muted);background:var(--bg);padding:6px 10px;border-radius:999px}
-  .progress b{color:var(--navy)}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+  .toolbar .right{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .panel-title,.sched-card h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
   .btn{
-    border:1px solid #dde2ec;background:#fff;color:var(--text);font:inherit;font-size:14px;font-weight:600;
-    padding:9px 14px;border-radius:10px;cursor:pointer;transition:.12s;white-space:nowrap;
+    border:1px solid var(--line);background:#fff;color:var(--ink-2);font:inherit;font-size:13px;font-weight:600;
+    padding:8px 12px;border-radius:8px;cursor:pointer;transition:.12s;white-space:nowrap;
   }
-  .btn:hover{border-color:var(--navy-2);color:var(--navy)}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn.primary:hover{filter:brightness(.95);color:#fff}
-  .btn.ghost{border-color:transparent;background:var(--bg)}
-  .teamcount{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
-  .teamcount input{width:58px;padding:7px 8px;border:1px solid #dde2ec;border-radius:8px;font:inherit;text-align:center}
+  .btn:hover{border-color:var(--wire);color:var(--ink)}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  .btn.primary:hover{background:#000;color:#fff}
+  .btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--danger)}
+  .teamcount{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);margin-right:4px}
+  .teamcount input{width:54px;padding:7px 6px;border:1px solid var(--line);border-radius:8px;font:inherit;text-align:center;color:var(--ink)}
 
-  .hint{font-size:13px;color:var(--muted);margin:4px 2px 0}
-  .warn{font-size:13px;color:var(--danger);margin:6px 2px 0;font-weight:600;min-height:1em}
+  .warn{font-size:13px;color:var(--danger);margin:8px 2px 0;font-weight:600}
+  .warn:empty{display:none}
 
-  .scroller{overflow-x:auto;padding:10px 0 4px;margin:0 -8px}
+  .scroller{overflow-x:auto;padding:16px 0 4px;margin:0 -8px}
   .bracket{position:relative;margin:0 auto}
   .bracket svg{position:absolute;inset:0;overflow:visible}
-  .bracket svg path{fill:none;stroke:var(--line);stroke-width:2.2;stroke-linejoin:round}
-  .bracket svg path.win{stroke:var(--accent);stroke-width:3.4}
+  .bracket svg path{fill:none;stroke:var(--wire);stroke-width:1.6;stroke-linejoin:round}
+  .bracket svg path.win{stroke:var(--primary);stroke-width:3}
 
   .gno{
     position:absolute;transform:translate(-50%,-50%);
-    width:28px;height:28px;border-radius:50%;
-    border:2px solid var(--accent);background:#fff;color:var(--accent);
-    font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;
+    border:1.5px solid var(--wire);background:#fff;color:var(--ink-2);
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
     cursor:pointer;padding:0;font-family:inherit;transition:.12s;
   }
-  .gno:hover{background:var(--accent);color:#fff;transform:translate(-50%,-50%) scale(1.1)}
-  .gno.done{background:var(--accent);color:#fff}
-  .gno.final{width:34px;height:34px;font-size:14px;border-color:var(--gold);color:#b88600}
-  .gno.final.done,.gno.final:hover{background:var(--gold);color:#fff}
+  .gno:hover{border-color:var(--primary);color:var(--primary)}
+  .gno.done{background:var(--primary);border-color:var(--primary);color:#fff}
+  .gno.final{width:32px;height:32px;font-size:13px;border-color:var(--gold);color:var(--gold)}
+  .gno.final.done,.gno.final:hover{background:var(--gold);border-color:var(--gold);color:#fff}
 
   .wchip{
     position:absolute;transform:translate(-50%,-50%);
-    background:var(--accent-soft);color:#c2391b;font-weight:800;font-size:12px;
-    padding:3px 8px;border-radius:999px;white-space:nowrap;pointer-events:none;
+    background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:12px;
+    padding:2px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;
   }
-  .champ{
-    position:absolute;transform:translate(-50%,-100%);text-align:center;white-space:nowrap;
-  }
-  .champ .trophy{font-size:26px;line-height:1}
+  .champ{position:absolute;transform:translate(-50%,-100%);text-align:center;white-space:nowrap}
   .champ .name{
-    display:inline-block;margin-top:4px;background:var(--gold);color:#fff;font-weight:800;
-    padding:5px 14px;border-radius:999px;font-size:15px;box-shadow:0 4px 12px rgba(245,183,0,.35)
+    display:inline-block;background:var(--gold);color:#fff;font-weight:800;
+    padding:6px 14px;border-radius:8px;font-size:14px;
   }
-  .champ .tbd{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+  .champ .tbd{
+    display:inline-block;font-size:12px;color:var(--gold);font-weight:700;
+    padding:4px 10px;border:1px dashed var(--gold);border-radius:8px;background:var(--gold-soft)
+  }
 
   .slot{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
-  .slot .num{
-    width:30px;height:30px;border-radius:9px;background:var(--navy);color:#fff;font-weight:800;
-    display:flex;align-items:center;justify-content:center;font-size:15px;
-  }
+  .slot .num{font-weight:700;font-size:12px;color:var(--muted)}
   .slot input{
-    width:70px;padding:8px 4px;text-align:center;border:2px solid #dde2ec;border-radius:10px;
-    font:inherit;font-weight:700;font-size:15px;color:var(--navy);background:#fff;transition:.12s;
+    width:68px;padding:8px 4px;text-align:center;border:1px solid var(--line);border-radius:8px;
+    font:inherit;font-weight:700;font-size:14px;color:var(--ink);background:#fff;transition:.12s;
   }
-  .slot input::placeholder{color:#c3c9d6;font-weight:500}
-  .slot input:focus{outline:none;border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(44,62,102,.15)}
-  .slot input.filled{border-color:var(--navy-2);background:#f2f5fb}
+  .slot input::placeholder{color:#c8ccd3;font-weight:500}
+  .slot input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+  .slot input.filled{background:#f8f9fb;border-color:var(--wire)}
   .slot input.dup{border-color:var(--danger);background:#fdecea;color:var(--danger)}
   .slot.flash input{animation:flash 1.2s ease 2}
-  @keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(255,107,74,0)}50%{box-shadow:0 0 0 6px rgba(255,107,74,.45)}}
-
-  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:6px;padding:10px 4px 0;border-top:1px dashed #e3e7ef}
-  .legend b{color:var(--text)}
-
-  .info{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-  .info .card{padding:16px 18px}
-  .info h3{margin:0 0 8px;font-size:15px}
-  .info ul{margin:0;padding-left:18px;font-size:14px;color:#3a4255;line-height:1.7}
+  @keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(47,91,234,0)}50%{box-shadow:0 0 0 6px rgba(47,91,234,.3)}}
 
   /* modal */
-  .overlay{position:fixed;inset:0;background:rgba(18,26,45,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .overlay{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
   .overlay.show{display:flex}
-  .modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:380px;box-shadow:0 20px 50px rgba(0,0,0,.25);text-align:center}
-  .modal h2{margin:0 0 4px;font-size:19px}
-  .modal .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 50px rgba(0,0,0,.18);text-align:center}
+  .modal h2{margin:0 0 4px;font-size:18px;font-weight:800}
+  .modal .sub{color:var(--muted);font-size:14px;margin-bottom:18px}
   .vs{display:flex;align-items:stretch;gap:10px}
   .vs .opt{
-    flex:1;border:2px solid #dde2ec;background:#fff;border-radius:14px;padding:16px 8px;cursor:pointer;
-    font:inherit;font-weight:800;font-size:18px;color:var(--navy);transition:.12s
+    flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:16px 8px;cursor:pointer;
+    font:inherit;font-weight:800;font-size:17px;color:var(--ink);transition:.12s
   }
-  .vs .opt:hover{border-color:var(--accent);background:var(--accent-soft);color:#c2391b}
-  .vs .opt.sel{border-color:var(--accent);background:var(--accent);color:#fff}
-  .vs .mid{align-self:center;font-weight:800;color:var(--muted)}
-  .modal .actions{display:flex;gap:8px;justify-content:center;margin-top:16px}
+  .vs .opt:hover{border-color:var(--primary);color:var(--primary)}
+  .vs .opt.sel{border-color:var(--primary);background:var(--primary);color:#fff}
+  .vs .mid{align-self:center;font-size:13px;font-weight:700;color:var(--muted)}
+  .modal .actions{display:flex;gap:6px;justify-content:center;margin-top:18px}
 
-  .draw-num{font-size:96px;font-weight:900;color:var(--accent);line-height:1;margin:10px 0 4px;font-variant-numeric:tabular-nums}
-  .draw-num.rolling{color:#c3c9d6}
-  .draw-label{font-size:15px;color:var(--muted);margin-bottom:12px}
+  .draw-num{font-size:88px;font-weight:900;color:var(--ink);line-height:1;margin:12px 0 6px;font-variant-numeric:tabular-nums}
+  .draw-num.rolling{color:#d3d7de}
+  .draw-label{font-size:14px;color:var(--muted);margin-bottom:14px}
   .modal input.big{
-    width:140px;padding:10px;text-align:center;border:2px solid #dde2ec;border-radius:12px;font:inherit;font-size:20px;font-weight:800;color:var(--navy)
+    width:140px;padding:10px;text-align:center;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:18px;font-weight:800;color:var(--ink)
   }
-  .modal input.big:focus{outline:none;border-color:var(--accent)}
+  .modal input.big:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
 
   .toast{
     position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
-    background:var(--navy);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;
+    background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;
     opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  .sched-card{margin-top:18px}
-  .sched-card h2{margin:0 0 4px;font-size:20px;font-weight:800}
-  .sched-card .hint{margin-bottom:12px}
+  .sched-card{margin-top:16px}
+  .sched-card h2{margin-bottom:14px}
   .sched-wrap{overflow-x:auto}
-  table.sched{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%;min-width:760px;font-size:14px}
-  table.sched th,table.sched td{border-bottom:1px solid #e6e9f0;padding:10px 8px;text-align:center;vertical-align:top}
-  table.sched thead th{background:var(--navy);color:#fff;font-weight:700;font-size:15px}
-  table.sched thead th:first-child{border-top-left-radius:10px}
-  table.sched thead th:last-child{border-top-right-radius:10px}
-  table.sched thead th.fday{background:#b88600}
-  table.sched tbody th{background:#f2f5fb;color:var(--navy);font-weight:800;white-space:nowrap;vertical-align:middle;width:96px}
+  table.sched{table-layout:fixed;border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+  table.sched th,table.sched td{border-bottom:1px solid var(--line);padding:10px 6px;text-align:center;vertical-align:top}
+  table.sched thead th{color:var(--muted);font-weight:700;font-size:13px;border-bottom:1px solid var(--wire)}
+  table.sched thead th.fday{color:var(--gold)}
+  table.sched tbody tr:last-child th,table.sched tbody tr:last-child td{border-bottom:0}
+  table.sched tbody th{color:var(--ink);font-weight:800;white-space:nowrap;vertical-align:middle;width:92px;text-align:left;padding-left:4px}
   table.sched tbody th small{display:block;font-weight:600;color:var(--muted);font-size:12px}
   .m{
-    display:block;width:100%;border:1px solid #e3e7ef;background:#fff;border-radius:10px;padding:7px 6px;margin:0 0 6px;
+    display:block;width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 6px;margin:0 0 6px;
     cursor:pointer;font:inherit;text-align:center;transition:.12s
   }
   .m:last-child{margin-bottom:0}
-  .m:hover{border-color:var(--accent)}
-  .m .no{display:inline-block;font-size:12px;font-weight:800;color:var(--accent);margin-bottom:2px}
-  .m.final .no{color:#b88600}
-  .m .tm{display:block;font-weight:700;color:var(--navy);font-size:13px;line-height:1.35;word-break:keep-all}
+  .m:hover{border-color:var(--primary)}
+  .m .no{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px}
+  .m.final .no{color:var(--gold)}
+  .m .tm{display:block;font-weight:700;color:var(--ink);font-size:13px;line-height:1.35;word-break:keep-all}
   .m .tm .tbd{color:var(--muted);font-weight:500}
-  .m .tm .w{color:#c2391b;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-  .m.done{background:#fff7f4;border-color:#ffd2c6}
-  .m.final{border-color:#f1d488;background:#fffbea}
-  .none{color:#c3c9d6;font-size:13px;display:block;padding-top:8px}
-  table.sched .notes{font-size:12px;color:var(--muted)}
-
-  footer{text-align:center;color:var(--muted);font-size:12px;padding:0 16px 30px}
+  .m .tm .w{color:var(--primary)}
+  .m .tm .vs-sep{color:var(--muted);font-weight:500;font-size:12px;margin:0 2px}
+  .m.done{background:#fafbff}
+  .m.final{border-color:#ecd9a4;background:var(--gold-soft)}
+  .none{color:#d3d7de;font-size:13px;display:block;padding-top:8px}
 
   @media (max-width:640px){
-    header{padding:22px 16px 64px}
-    .card{padding:14px}
-    .tab{padding:10px 18px;font-size:15px}
+    header{padding:26px 16px 16px}
+    .card{padding:16px}
+    .tab{padding:8px 22px}
     .toolbar{flex-direction:column;align-items:stretch}
-    .toolbar .left,.toolbar .right{justify-content:center}
+    .toolbar .right{justify-content:center}
   }
 
   /* print: both grades, one per page */
   @media print{
     @page{size:A4 landscape;margin:12mm}
     body{background:#fff}
-    header{background:none;color:#000;padding:0 0 8px}
-    header::after,header p,.tabs,.toolbar .right,.teamcount,.hint,.warn,.info,footer,.legend{display:none!important}
+    header{padding:0 0 8px}
+    .tabs,.toolbar .right,.warn{display:none!important}
     .sched-card{margin-top:0}
     .sched-wrap{overflow:visible}
-    .m{border-color:#ccc!important;background:#fff!important}
     main{margin:0;max-width:none;padding:0}
-    .card{box-shadow:none;padding:0}
+    .card{border:0;padding:0}
     .panel{display:block!important;page-break-after:always}
-    .panel:last-of-type{page-break-after:auto}
     .scroller{overflow:visible}
-    .slot input{border:1.5px solid #888;background:#fff!important;color:#000}
+    .slot input{border:1px solid #888;background:#fff!important;color:#000}
     .slot input:placeholder-shown{color:transparent}
-    .gno{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .wchip,.champ .name,.slot .num,.gno.done{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .gno,.wchip,.champ .name,.m.final{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="eyebrow">2026 제주중앙여자고등학교 스포츠 주간</div>
-  <h1>빅발리볼 <span>대진표</span></h1>
-  <p>제48기 학생자치회 여울 체육건강부</p>
+  <div class="eyebrow">2026 제주중앙여고 스포츠 주간</div>
+  <h1>빅발리볼 대진표</h1>
 </header>
 
 <main>
   <div class="tabs" role="tablist">
-    <button class="tab active" data-g="g1">1학년 <span class="cnt" id="cnt-g1"></span></button>
-    <button class="tab" data-g="g2">2학년 <span class="cnt" id="cnt-g2"></span></button>
+    <button class="tab active" data-g="g1">1학년</button>
+    <button class="tab" data-g="g2">2학년</button>
   </div>
 
   <section class="panel card active" id="panel-g1"></section>
   <section class="panel card" id="panel-g2"></section>
 
   <section class="card sched-card" id="schedule"></section>
-
-  <div class="info">
-    <div class="card">
-      <h3>⏰ 경기 시간</h3>
-      <ul>
-        <li>점심시간, 하루 2경기씩 (코트 2개)</li>
-        <li>1타임 11:30~11:50 · 1학년</li>
-        <li>2타임 11:55~12:15 · 2학년</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>🏐 경기 방식</h3>
-      <ul>
-        <li>가운데 두 코트에서 두 경기 동시 진행</li>
-        <li>결승전은 3판 2승제, 나머지는 단판</li>
-        <li>복장: 체육복·생활복·운동화</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3>✏️ 사용 방법</h3>
-      <ul>
-        <li>뽑은 번호 칸에 반을 적어요 (숫자만 써도 돼요)</li>
-        <li>빨간 동그라미(경기 번호)를 눌러 승리 반을 골라요</li>
-        <li>입력 내용은 이 기기에 자동 저장돼요</li>
-      </ul>
-    </div>
-  </div>
 </main>
-
-<footer>2026 제주중앙여자고등학교 학생자치회 여울 체육건강부</footer>
 
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
@@ -399,17 +339,15 @@
     function py(nd){ return nd.leaf ? base : base - nd.h * STEP; }
 
     var html = '';
-    html += '<div class="toolbar"><div class="left">' +
-              '<h2 class="panel-title">' + GRADES[g].title + ' 대진표</h2>' +
-              '<span class="progress" id="prog-' + g + '"></span>' +
-            '</div><div class="right">' +
+    html += '<div class="toolbar">' +
+              '<h2 class="panel-title">' + GRADES[g].title + '</h2>' +
+            '<div class="right">' +
               '<label class="teamcount">팀 수 <input type="number" min="'+MIN_N+'" max="'+MAX_N+'" value="'+gs.n+'" data-act="n"></label>' +
-              '<button class="btn primary" data-act="draw">🎲 번호 뽑기</button>' +
-              '<button class="btn" data-act="share">🔗 공유 링크</button>' +
-              '<button class="btn" data-act="print">🖨 인쇄</button>' +
+              '<button class="btn primary" data-act="draw">번호 뽑기</button>' +
+              '<button class="btn" data-act="share">공유</button>' +
+              '<button class="btn" data-act="print">인쇄</button>' +
               '<button class="btn ghost" data-act="reset">초기화</button>' +
             '</div></div>';
-    html += '<p class="hint">뽑은 번호 칸에 반을 적어 주세요. 빨간 동그라미를 누르면 그 경기의 승리 반을 고를 수 있어요.</p>';
     html += '<div class="warn" id="warn-' + g + '"></div>';
     html += '<div class="scroller"><div class="bracket" style="width:'+W+'px;height:'+H+'px">';
 
@@ -446,7 +384,6 @@
 
     // champion
     html += '<div class="champ" style="left:'+px(t.root)+'px;top:'+(py(t.root)-28)+'px">' +
-            '<div class="trophy">🏆</div>' +
             (champ ? '<div class="name">' + esc(champ.name) + ' 우승!</div>' : '<div class="tbd">우승</div>') +
             '</div>';
 
@@ -463,14 +400,10 @@
     });
 
     html += '</div></div>';
-    html += '<div class="legend"><span>총 <b>' + gs.n + '팀</b> · <b>' + (gs.n-1) + '경기</b></span>' +
-            '<span>빨간 동그라미 숫자 = 경기 번호 (작은 번호부터 진행)</span>' +
-            '<span>빈 칸 없이 바로 위 경기로 올라가는 팀은 부전승</span></div>';
 
     panel.innerHTML = html;
     refreshStatus(g);
     renderSchedule();
-    document.getElementById("cnt-" + g).textContent = gs.n + "팀";
   }
 
   /* ---------- schedule ---------- */
@@ -517,12 +450,11 @@
     });
     var finals = rows.map(function(r){ return r.dayOf[trees[r.g].root.id]; });
 
-    var h = '<h2>🗓 경기 일정</h2>' +
-            '<p class="hint">팀 수에 맞춰 자동으로 짜여요. 경기를 누르면 결과를 입력할 수 있어요.</p>' +
-            '<div class="sched-wrap"><table class="sched"><thead><tr><th>경기 일정</th>';
+    var h = '<h2>경기 일정</h2>' +
+            '<div class="sched-wrap"><table class="sched"><thead><tr><th></th>';
     for (var d = 0; d <= maxIdx; d++) {
       var isF = finals.indexOf(d) >= 0;
-      h += '<th' + (isF ? ' class="fday"' : '') + '>' + (START_DAY + d) + '일' + (isF ? ' 🏆' : '') + '</th>';
+      h += '<th' + (isF ? ' class="fday"' : '') + '>' + (START_DAY + d) + '일' + (isF ? ' · 결승' : '') + '</th>';
     }
     h += '</tr></thead><tbody>';
     rows.forEach(function(r){
@@ -539,15 +471,14 @@
           if (w === "R") b = '<span class="w">' + b + '</span>';
           h += '<button class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
                  '<span class="no">' + (isFinal ? '결승 (' + gm.id + '경기) · 3판 2승' : gm.id + '경기') + '</span>' +
-                 '<span class="tm">' + a + ' vs ' + b + '</span>' +
+                 '<span class="tm">' + a + ' <span class="vs-sep">vs</span> ' + b + '</span>' +
                '</button>';
         });
         h += '</td>';
       }
       h += '</tr>';
     });
-    h += '</tbody></table></div>' +
-         '<p class="hint" style="margin:10px 2px 0">결승전은 3판 2승제, 나머지는 모두 단판 · 밑줄 = 이긴 반</p>';
+    h += '</tbody></table></div>';
     document.getElementById("schedule").innerHTML = h;
   }
 
@@ -564,11 +495,8 @@
       inp.classList.toggle("filled", !!l);
       inp.classList.toggle("dup", !!l && counts[l] > 1);
     });
-    var done = Object.keys(gs.winners).length;
-    document.getElementById("prog-" + g).innerHTML =
-      '반 입력 <b>' + filled + '/' + gs.n + '</b> · 경기 결과 <b>' + done + '/' + (gs.n-1) + '</b>';
     document.getElementById("warn-" + g).textContent =
-      dups.length ? "⚠ 같은 반이 두 번 들어갔어요: " + dups.join(", ") : "";
+      dups.length ? "같은 반이 중복됐어요: " + dups.join(", ") : "";
   }
 
   function esc(s){
@@ -596,7 +524,7 @@
     var gs = state[g], t = trees[g], gm = t.byId[id];
     var isFinal = gm === t.root;
     var A = teamOf(gs, gm.left), B = teamOf(gs, gm.right);
-    var title = isFinal ? "🏆 결승전" : (id + "경기");
+    var title = isFinal ? "결승전" : (id + "경기");
     if (!A || !B) {
       var need = [];
       if (!A) need.push(gm.left.id + "경기");
@@ -624,7 +552,7 @@
         if (gs.winners[id] !== side) { clearAncestors(gs, gm); gs.winners[id] = side; }
         save(); renderPanel(g); closeModal();
         var w = teamOf(gs, gm);
-        toast(isFinal ? "🏆 " + w.name + " 우승을 축하해요!" : id + "경기 승리: " + w.name);
+        toast(isFinal ? w.name + " 우승을 축하해요!" : id + "경기 승리: " + w.name);
       }
       if (act === "clear") {
         delete gs.winners[id]; clearAncestors(gs, gm);
@@ -639,13 +567,13 @@
     var left = [];
     for (var i=1;i<=gs.n;i++) if (!classLabel(gs.classes[i])) left.push(i);
     if (!left.length) {
-      openModal('<h2>🎲 번호 뽑기</h2><div class="sub">모든 번호에 반이 들어갔어요!</div>' +
+      openModal('<h2>번호 뽑기</h2><div class="sub">모든 번호에 반이 들어갔어요!</div>' +
         '<div class="actions"><button class="btn" data-m="close">확인</button></div>');
       modal.onclick = function(e){ if (e.target.closest('[data-m="close"]')) closeModal(); };
       return;
     }
     var pick = left[Math.floor(Math.random() * left.length)];
-    openModal('<h2>🎲 ' + GRADES[g].title + ' 번호 뽑기</h2>' +
+    openModal('<h2>' + GRADES[g].title + ' 번호 뽑기</h2>' +
       '<div class="sub">남은 번호 ' + left.length + '개 중에서 뽑아요</div>' +
       '<div class="draw-num rolling" id="drawNum">?</div>' +
       '<div class="draw-label" id="drawLabel">두구두구…</div>' +
@@ -690,7 +618,7 @@
     var data = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
     var url = location.href.split("#")[0] + "#d=" + encodeURIComponent(data);
     function fallback(){
-      openModal('<h2>🔗 공유 링크</h2><div class="sub">아래 링크를 복사해서 보내 주세요</div>' +
+      openModal('<h2>공유 링크</h2><div class="sub">아래 링크를 복사해서 보내 주세요</div>' +
         '<textarea id="shareTa" style="width:100%;height:90px;font-size:12px;border:1px solid #dde2ec;border-radius:10px;padding:8px" readonly>' + esc(url) + '</textarea>' +
         '<div class="actions"><button class="btn" data-m="close">닫기</button></div>');
       var ta = document.getElementById("shareTa"); ta.focus(); ta.select();

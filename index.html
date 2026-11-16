@@ -144,7 +144,7 @@
   table.sched{table-layout:fixed;border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
   table.sched th,table.sched td{border-bottom:1px solid var(--line);padding:10px 6px;text-align:center;vertical-align:top}
   table.sched thead th{color:var(--muted);font-weight:700;font-size:13px;border-bottom:1px solid var(--wire)}
-  table.sched thead th.fday{color:var(--gold)}
+  .m .fnote{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;color:var(--gold);border:1px dashed var(--gold);border-radius:6px;padding:1px 6px}
   table.sched tbody tr:last-child th,table.sched tbody tr:last-child td{border-bottom:0}
   table.sched tbody th{color:var(--ink);font-weight:800;white-space:nowrap;vertical-align:middle;width:104px;text-align:left;padding-left:4px}
   table.sched tbody th small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
@@ -487,11 +487,35 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
   }
 
   /* ---------- schedule ---------- */
-  // 계획서 기준: 11월 23일부터 하루 2경기(코트 2개), 결승은 11월 28일.
-  var START_DAY = 23, FINAL_DAY = 28, PER_DAY = 2;
+  // 11월 23일(월)부터 평일에만 하루 2경기(코트 2개). 주말은 건너뜀.
+  // 결승: 2학년 11월 27일(금), 1학년 11월 30일(월) — 2026-11-16 사용자 지시 (11월 28일은 토요일)
+  var START_DATE = new Date(2026, 10, 23), PER_DAY = 2;
+  var FINAL_DATE = { g1: new Date(2026, 10, 30), g2: new Date(2026, 10, 27) };
+  var FINAL_NOTE = { g1: "시간 미정" };   // 1학년 결승 1타임/2타임 미정
+  var WEEK = ["일","월","화","수","목","금","토"];
+
+  // 평일 번호(0 = 시작일) ↔ 날짜
+  function dateOfIdx(i){
+    var d = new Date(START_DATE.getTime()), n = 0;
+    while (true) {
+      var wd = d.getDay();
+      if (wd !== 0 && wd !== 6) { if (n === i) return d; n++; }
+      d.setDate(d.getDate() + 1);
+    }
+  }
+  function idxOfDate(date){
+    var i = 0;
+    while (dateOfIdx(i) < date) i++;
+    return i;
+  }
+  function dayLabel(i){
+    var d = dateOfIdx(i), first = dateOfIdx(0);
+    var m = d.getMonth() !== first.getMonth() ? (d.getMonth() + 1) + "월 " : "";
+    return m + d.getDate() + "일(" + WEEK[d.getDay()] + ")";
+  }
 
   // 경기 번호 순서대로 하루 2경기씩 배치. 앞 경기 승자가 필요한 경기는 그 다음 날 이후로.
-  function buildSchedule(t){
+  function buildSchedule(t, g){
     var dayOf = {}, used = {}, cursor = 0, lastDay = 0;
     t.games.forEach(function(gm){
       if (gm === t.root) return;
@@ -501,7 +525,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
       while ((used[d] || 0) >= PER_DAY) d++;
       dayOf[gm.id] = d; used[d] = (used[d] || 0) + 1; cursor = d; lastDay = Math.max(lastDay, d);
     });
-    var finalIdx = FINAL_DAY - START_DAY;
+    var finalIdx = idxOfDate(FINAL_DATE[g]);
     var hasOthers = t.games.length > 1;
     if (hasOthers && lastDay >= finalIdx) finalIdx = lastDay + 1;
     dayOf[t.root.id] = finalIdx;
@@ -525,16 +549,14 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
     ];
     var maxIdx = 0;
     rows.forEach(function(r){
-      r.dayOf = buildSchedule(trees[r.g]);
+      r.dayOf = buildSchedule(trees[r.g], r.g);
       Object.keys(r.dayOf).forEach(function(k){ maxIdx = Math.max(maxIdx, r.dayOf[k]); });
     });
-    var finals = rows.map(function(r){ return r.dayOf[trees[r.g].root.id]; });
 
     var h = '<h2>경기 일정</h2>' +
             '<div class="sched-wrap"><table class="sched"><thead><tr><th></th>';
     for (var d = 0; d <= maxIdx; d++) {
-      var isF = finals.indexOf(d) >= 0;
-      h += '<th' + (isF ? ' class="fday"' : '') + '>' + (START_DAY + d) + '일' + (isF ? ' · 결승' : '') + '</th>';
+      h += '<th>' + dayLabel(d) + '</th>';
     }
     h += '</tr></thead><tbody>';
     rows.forEach(function(r){
@@ -553,6 +575,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
           h += '<' + tag + ' class="m' + (isFinal ? ' final' : '') + (w ? ' done' : '') + '" data-sg="' + r.g + '" data-game="' + gm.id + '">' +
                  '<span class="no">' + (isFinal ? '결승 (' + gm.id + '경기) · 3판 2승' : gm.id + '경기') + '</span>' +
                  '<span class="tm">' + a + ' <span class="vs-sep">vs</span> ' + b + '</span>' +
+                 (isFinal && FINAL_NOTE[r.g] ? '<span class="fnote">' + FINAL_NOTE[r.g] + '</span>' : '') +
                '</' + tag + '>';
         });
         h += '</td>';

@@ -905,9 +905,26 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
       if (c === "auth/popup-blocked" || c === "auth/operation-not-supported-in-this-environment") {
         auth.signInWithRedirect(provider);
       } else if (c !== "auth/popup-closed-by-user" && c !== "auth/cancelled-popup-request") {
-        toast("로그인하지 못했어요. 크롬이나 사파리에서 다시 시도해 주세요");
+        showLoginError(err);
       }
     });
+  }
+
+  // 로그인 실패 이유를 화면에 보여 줌 (원인 파악용 오류 코드 포함)
+  function showLoginError(err){
+    var c = (err && err.code) || "unknown";
+    var host = location.hostname;
+    var msg = {
+      "auth/unauthorized-domain": "이 사이트 주소(<b>" + esc(host) + "</b>)가 Firebase에 등록되어 있지 않아요.<br>Firebase → Authentication → 설정 → 승인된 도메인에 <b>" + esc(host) + "</b>을(를) 추가해 주세요.",
+      "auth/operation-not-allowed": "Firebase에서 Google 로그인이 꺼져 있어요.<br>Firebase → Authentication → Sign-in method → Google을 사용 설정해 주세요.",
+      "auth/network-request-failed": "인터넷 연결이 불안정해요. 연결을 확인하고 다시 시도해 주세요.",
+      "auth/user-disabled": "Firebase에서 사용 중지된 계정이에요.",
+      "auth/admin-restricted-operation": "Firebase 설정에서 이 로그인이 막혀 있어요."
+    }[c] || "로그인하지 못했어요. 아래 오류 코드를 알려 주세요.";
+    openModal('<h2>로그인 오류</h2><div class="sub" style="line-height:1.6">' + msg + '</div>' +
+      '<div class="sub" style="font-size:12px">오류 코드: ' + esc(c) + ' · 주소: ' + esc(host) + '</div>' +
+      '<div class="actions"><button class="btn" data-m="close">닫기</button></div>');
+    modal.onclick = function(e){ if (e.target.closest('[data-m="close"]')) closeModal(); };
   }
 
   // 로그인한 계정이 운영자인지 확인
@@ -971,7 +988,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database(); auth = firebase.auth();
     auth.onAuthStateChanged(checkAdmin);
-    auth.getRedirectResult().catch(function(){});
+    auth.getRedirectResult().catch(showLoginError);
     db.ref(DB_PATH).on("value", function(snap){
       var next = sanitize(snap.val());
       if (JSON.stringify(next) === JSON.stringify(state)) return; // 내가 방금 저장한 값이면 다시 그리지 않음

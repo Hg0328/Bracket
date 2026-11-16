@@ -294,7 +294,8 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
 
   var KEY = "jjgh-bigvolley-bracket-2026";
   // pairFirst: 첫 판에서 1·2번, 3·4번 … 처럼 모든 팀이 경기 (부전승은 그다음 라운드에 생김) — 2학년, 사용자 지시
-  var GRADES = { g1: { title: "1학년", defaultN: 12 }, g2: { title: "2학년", defaultN: 10, pairFirst: true } };
+  // pairRounds: 라운드마다 앞에서부터 둘씩 짝짓고, 홀수면 마지막 팀이 다음 라운드로 (1학년, 대진표 추첨 자료 12팀 그림과 같음)
+  var GRADES = { g1: { title: "1학년", defaultN: 12, pairRounds: true }, g2: { title: "2학년", defaultN: 10, pairFirst: true } };
   var MIN_N = 2, MAX_N = 32;
 
   /* ---------- state ---------- */
@@ -365,7 +366,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
 
   /* ---------- bracket structure ---------- */
   // Balanced split: bigger half on the left, so byes sit on the right of each group (like the plan document).
-  function buildTree(n, pairFirst){
+  function buildTree(n, pairFirst, pairRounds){
     var slot = 0, root;
     function b(k, parent){
       if (k === 1) { return { leaf:true, slot:++slot, parent:parent }; }
@@ -375,7 +376,21 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
       node.right = b(k-a, node);
       return node;
     }
-    if (pairFirst && n >= 4) {
+    if (pairRounds && n >= 2) {
+      var lv = [];
+      for (var j = 1; j <= n; j++) lv.push({ leaf:true, slot:j });
+      while (lv.length > 1) {
+        var nx = [];
+        for (var k = 0; k < lv.length; k += 2) {
+          if (k + 1 < lv.length) {
+            var nd = { leaf:false, left:lv[k], right:lv[k+1] };
+            lv[k].parent = nd; lv[k+1].parent = nd; nx.push(nd);
+          } else nx.push(lv[k]);
+        }
+        lv = nx;
+      }
+      root = lv[0]; root.parent = null;
+    } else if (pairFirst && n >= 4) {
       // 1라운드: (1,2) (3,4) … 짝지어 경기, 홀수면 마지막 팀만 남김
       var items = [];
       for (var i = 1; i <= n; i += 2) {
@@ -446,7 +461,7 @@ var OWNER_EMAIL = "jungang2620920@onedu.jje.go.kr";
 
   function renderPanel(g){
     var gs = state[g];
-    var t = trees[g] = buildTree(gs.n, GRADES[g].pairFirst);
+    var t = trees[g] = buildTree(gs.n, GRADES[g].pairFirst, GRADES[g].pairRounds);
     var panel = document.getElementById("panel-" + g);
     var horiz = isPhone();
     var W, H, base, px, py, stepH;
